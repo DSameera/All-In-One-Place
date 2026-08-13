@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Simple Interactive Dashboard</title>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root{
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --accent: #2563eb;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --glass: rgba(255,255,255,0.6);
+    }
+    body.dark {
+      --bg: #0b1220;
+      --card: #0f1724;
+      --text: #e6eef8;
+      --muted: #9aa7bd;
+      --accent: #60a5fa;
+      --glass: rgba(255,255,255,0.03);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background:linear-gradient(180deg,var(--bg),#e9eef8);
+      color:var(--text);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      min-height:100vh;
+    }
+    header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:16px 20px;
+      gap:12px;
+    }
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{
+      width:40px;height:40px;border-radius:8px;
+      background:linear-gradient(135deg,var(--accent),#7c3aed);
+      display:flex;align-items:center;justify-content:center;color:white;font-weight:700;
+      box-shadow:0 4px 10px rgba(37,99,235,0.12);
+    }
+    .controls{display:flex;gap:8px;align-items:center}
+    button{
+      padding:8px 12px;border-radius:8px;border:0;background:var(--card);cursor:pointer;color:var(--text);
+      box-shadow:0 1px 0 rgba(0,0,0,0.03);
+    }
+    button.primary{background:var(--accent);color:white}
+    button.ghost{background:transparent;border:1px solid rgba(0,0,0,0.06)}
+    .layout{
+      display:grid;
+      grid-template-columns:220px 1fr;
+      gap:18px;
+      padding:0 20px 40px;
+      align-items:start;
+    }
+    nav{
+      background:var(--card);
+      padding:16px;border-radius:12px;height:fit-content;
+      box-shadow:0 6px 18px rgba(11,20,32,0.04);
+    }
+    nav a{display:block;padding:10px;border-radius:8px;color:var(--text);text-decoration:none;margin-bottom:6px}
+    nav a.active{background:var(--glass);font-weight:600}
+    main{
+      display:flex;flex-direction:column;gap:18px;
+    }
+    .kpis{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+      gap:12px;
+    }
+    .card{
+      background:var(--card);
+      padding:14px;border-radius:12px;
+      box-shadow:0 6px 16px rgba(11,20,32,0.04);
+    }
+    .kpi-value{font-size:1.4rem;font-weight:700}
+    .kpi-label{color:var(--muted);font-size:0.9rem;margin-top:6px}
+
+    .charts{
+      display:grid;
+      grid-template-columns:2fr 1fr;
+      gap:12px;
+    }
+    canvas{width:100% !important; height:260px !important}
+
+    .table-controls{
+      display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:8px;
+    }
+    .search{padding:8px;border-radius:8px;border:1px solid rgba(0,0,0,0.06);min-width:220px}
+    table{width:100%;border-collapse:collapse;background:var(--card);border-radius:10px;overflow:hidden}
+    th,td{padding:10px 12px;text-align:left;border-bottom:1px solid rgba(0,0,0,0.04)}
+    th{background:linear-gradient(180deg,rgba(0,0,0,0.02),transparent);cursor:pointer;user-select:none}
+    tr:hover td{background:linear-gradient(90deg,rgba(0,0,0,0.02),transparent)}
+    .muted{color:var(--muted);font-size:0.9rem}
+    .small{font-size:0.85rem}
+    @media (max-width:900px){
+      .layout{grid-template-columns:1fr; padding:0 12px 30px;}
+      .charts{grid-template-columns:1fr;grid-auto-rows:minmax(180px,auto)}
+      canvas{height:220px !important}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="logo">DB</div>
+      <div>
+        <div style="font-weight:700">Simple Dashboard</div>
+        <div class="muted small">Interactive demo — no setup required</div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button id="refreshBtn" title="Generate new sample data">Refresh Data</button>
+      <button id="addRowBtn" class="ghost" title="Add a random table row">Add Row</button>
+      <label style="display:flex;align-items:center;gap:8px">
+        <input id="darkToggle" type="checkbox" /> Dark
+      </label>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav aria-label="Main navigation">
+      <a href="#" class="active">Dashboard</a>
+      <a href="#">Reports</a>
+      <a href="#">Analytics</a>
+      <a href="#">Settings</a>
+    </nav>
+
+    <main>
+      <section class="kpis" aria-label="Key performance indicators">
+        <div class="card">
+          <div class="kpi-value" id="kpiUsers">—</div>
+          <div class="kpi-label">Total Users</div>
+        </div>
+
+        <div class="card">
+          <div class="kpi-value" id="kpiActive">—</div>
+          <div class="kpi-label">Active Today</div>
+        </div>
+
+        <div class="card">
+          <div class="kpi-value" id="kpiRevenue">—</div>
+          <div class="kpi-label">Revenue (USD)</div>
+        </div>
+
+        <div class="card">
+          <div class="kpi-value" id="kpiConv">—</div>
+          <div class="kpi-label">Conversion Rate</div>
+        </div>
+      </section>
+
+      <section class="charts" aria-label="Charts">
+        <div class="card" style="padding:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <div style="font-weight:700">Visitors (last 14 days)</div>
+            <div class="muted small" id="lastUpdate">updated just now</div>
+          </div>
+          <canvas id="lineChart" aria-label="Line chart of visitors"></canvas>
+        </div>
+
+        <div class="card" style="padding:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <div style="font-weight:700">Sales by Product</div>
+            <div class="muted small">Units sold</div>
+          </div>
+          <canvas id="barChart" aria-label="Bar chart of sales"></canvas>
+        </div>
+      </section>
+
+      <section class="card" style="padding:12px">
+        <div class="table-controls">
+          <div style="display:flex;gap:8px;align-items:center">
+            <input id="tableSearch" class="search" placeholder="Search activity..." />
+            <div class="muted small">Showing recent activity</div>
+          </div>
+          <div class="muted small">Click table headers to sort</div>
+        </div>
+
+        <div style="overflow:auto;border-radius:8px">
+          <table id="activityTable" aria-label="Recent activity">
+            <thead>
+              <tr>
+                <th data-col="timestamp">Time</th>
+                <th data-col="user">User</th>
+                <th data-col="action">Action</th>
+                <th data-col="value">Value</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // ---------- Simple sample-data generator ----------
+    function formatNumber(n){
+      return n.toLocaleString();
+    }
+    function rand(min, max){
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+    function sampleUsers(){
+      return rand(2000, 12000);
+    }
+    function sampleActive(total){
+      return Math.round(total * (0.02 + Math.random() * 0.1));
+    }
+    function sampleRevenue(){
+      return (Math.random()*20000 + 3000).toFixed(2);
+    }
+    function sampleConv(){
+      return (Math.random()*4 + 0.5).toFixed(2) + "%";
+    }
+
+    // Generate arrays for last N days
+    function generateTimeSeries(days){
+      const labels = [];
+      const values = [];
+      for(let i=days-1;i>=0;i--){
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        labels.push(d.toLocaleDateString(undefined,{month:'short',day:'numeric'}));
+        values.push(rand(150, 2200));
+      }
+      return {labels, values};
+    }
+
+    // Sample product sales
+    const productNames = ["Basic", "Plus", "Pro", "Enterprise"];
+    function generateProductSales(){
+      return productNames.map(()=>rand(20, 600));
+    }
+
+    // ---------- Chart setup using Chart.js ----------
+    const lineCtx = document.getElementById("lineChart").getContext("2d");
+    const barCtx = document.getElementById("barChart").getContext("2d");
+
+    let lineChart = new Chart(lineCtx, {
+      type: "line",
+      data: {
+        labels: [],
+        datasets: [{
+          label: "Visitors",
+          data: [],
+          borderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent') || '#2563eb',
+          backgroundColor: "rgba(37,99,235,0.08)",
+          fill: true,
+          tension: 0.3,
+          pointRadius: 2
+        }]
+      },
+      options: {
+        plugins:{legend:{display:false}},
+        responsive:true,
+        scales:{
+          x:{grid:{display:false}},
+          y:{grid:{color:"rgba(0,0,0,0.04)"}}
+        }
+      }
+    });
+
+    let barChart = new Chart(barCtx, {
+      type: "bar",
+      data: {
+        labels: productNames,
+        datasets: [{
+          label: "Units",
+          data: [],
+          backgroundColor: ["#60a5fa","#7c3aed","#34d399","#f97316"]
+        }]
+      },
+      options: {
+        plugins:{legend:{display:false}},
+        responsive:true,
+        scales:{
+          x:{grid:{display:false}},
+          y:{grid:{color:"rgba(0,0,0,0.04)"}}
+        }
+      }
+    });
+
+    // ---------- Table management ----------
+    const tableBody = document.querySelector("#activityTable tbody");
+    let activityRows = [];
+
+    function addActivityRow(time, user, action, value){
+      activityRows.unshift({time, user, action, value});
+      renderTable();
+    }
+    function renderTable(filterText){
+      tableBody.innerHTML = "";
+      const filtered = (filterText && filterText.trim() !== "")
+        ? activityRows.filter(r => (
+            r.user.toLowerCase().includes(filterText.toLowerCase()) ||
+            r.action.toLowerCase().includes(filterText.toLowerCase()) ||
+            String(r.value).toLowerCase().includes(filterText.toLowerCase())
+          ))
+        : activityRows;
+      for(const r of filtered){
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td class="small">${r.time}</td>
+          <td>${r.user}</td>
+          <td class="muted">${r.action}</td>
+          <td>${r.value}</td>
+        `;
+        tableBody.appendChild(tr);
+      }
+    }
+
+    // Sorting (basic)
+    let sortState = {col:null, asc:true};
+    document.querySelectorAll("#activityTable th").forEach((th, idx) => {
+      th.addEventListener("click", () => {
+        const col = th.getAttribute("data-col");
+        sortState.asc = (sortState.col === col) ? !sortState.asc : true;
+        sortState.col = col;
+        activityRows.sort((a,b) => {
+          let A = a[col], B = b[col];
+          // for timestamp sort by date
+          if(col === "timestamp" || col === "time"){
+            A = new Date(a.time); B = new Date(b.time);
+          }
+          if(typeof A === "string" && !isNaN(Number(A))) { A = Number(A); B = Number(B); }
+          if(A < B) return sortState.asc ? -1 : 1;
+          if(A > B) return sortState.asc ? 1 : -1;
+          return 0;
+        });
+        renderTable(document.getElementById("tableSearch").value);
+      });
+    });
+
+    // ---------- Dashboard update ----------
+    function updateKPIs(){
+      const totalUsers = sampleUsers();
+      const active = sampleActive(totalUsers);
+      const revenue = sampleRevenue();
+      const conv = sampleConv();
+
+      document.getElementById("kpiUsers").textContent = formatNumber(totalUsers);
+      document.getElementById("kpiActive").textContent = formatNumber(active);
+      document.getElementById("kpiRevenue").textContent = "$" + formatNumber(Number(revenue));
+      document.getElementById("kpiConv").textContent = conv;
+    }
+
+    function updateCharts(){
+      const ts = generateTimeSeries(14);
+      lineChart.data.labels = ts.labels;
+      lineChart.data.datasets[0].data = ts.values;
+      lineChart.update();
+
+      barChart.data.datasets[0].data = generateProductSales();
+      barChart.update();
+
+      document.getElementById("lastUpdate").textContent = "updated " + new Date().toLocaleTimeString();
+    }
+
+    function generateInitialActivity(){
+      activityRows = [];
+      const now = new Date();
+      for(let i=0;i<12;i++){
+        const t = new Date(now - i*1000*60*60);
+        addActivityRow(t.toLocaleString(), `user${rand(2,600)}`, ["Logged in","Purchased","Upgraded plan","Viewed report","Signed up"][rand(0,4)], ["$" + rand(5,300), "", "$" + rand(50,900), "", ""][rand(0,4)]);
+      }
+    }
+
+    function refreshAll(){
+      updateKPIs();
+      updateCharts();
+      document.getElementById("lastUpdate").classList.add("muted");
+    }
+
+    // ---------- UI interactions ----------
+    document.getElementById("refreshBtn").addEventListener("click", () => {
+      refreshAll();
+      // Add a few new activity rows to show changes
+      const actions = ["Viewed dashboard","Exported CSV","Purchased","Signed up","Updated profile"];
+      for(let i=0;i<3;i++){
+        addActivityRow(new Date().toLocaleString(), `user${rand(1,999)}`, actions[rand(0,actions.length-1)], (Math.random()>0.6 ? "$"+rand(5,999) : ""));
+      }
+    });
+    document.getElementById("addRowBtn").addEventListener("click", () => {
+      addActivityRow(new Date().toLocaleString(), `user${rand(1000,9999)}`, ["Commented","Shared report","Purchased","Logged out"][rand(0,3)], (Math.random()>0.4 ? "$"+rand(10,400) : ""));
+    });
+
+    document.getElementById("tableSearch").addEventListener("input", (e) => {
+      renderTable(e.target.value);
+    });
+
+    // Dark mode toggle
+    const darkToggle = document.getElementById("darkToggle");
+    darkToggle.addEventListener("change", () => {
+      document.body.classList.toggle("dark", darkToggle.checked);
+    });
+
+    // ---------- Initial load ----------
+    generateInitialActivity();
+    refreshAll();
+    renderTable();
+
+    // Expose a small helper so you can play from console:
+    window.dashboard = {
+      refresh: refreshAll,
+      addRow: () => document.getElementById("addRowBtn").click(),
+      addActivityRow
+    };
+
+    // Accessibility: focus first focusable control
+    document.getElementById("refreshBtn").focus();
+  </script>
+</body>
+</html>
