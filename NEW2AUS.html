@@ -1,0 +1,1102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>NEW2AUS — All-in-One Settlement Portal</title>
+  <style>
+    :root{
+      --bg-fallback-start: #ffffff;
+      --bg-fallback-end: #fbfdff;
+      --card-bg: rgba(255,255,255,0.96); /* translucent so unified bg shows */
+      --muted:#6b7280;
+      --accent:#1f6feb;
+      --radius:12px;
+      --shadow: 0 10px 30px rgba(15,23,42,0.08);
+      --max-width:1100px;
+      --transition:300ms cubic-bezier(.2,.9,.3,1);
+      --font-sans:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+
+      /* Added for completeness and contrast */
+      --cta-bg: #4f46e5;
+      --heading-dark: #071024;
+      --meta-dark: #334155;
+      --body-dark: #0b1220;
+    }
+
+    html,body{
+      height:100%;
+      margin:0;
+      font-family:var(--font-sans);
+      background:var(--bg-fallback-start);
+      color:var(--body-dark);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      line-height:1.45;
+    }
+
+    /* Unified site background: images/bg2.jpg then fallback gradient */
+    .site-bg{
+      min-height:100%;
+      background-image: url('images/bg2.jpg'), linear-gradient(180deg,var(--bg-fallback-start),var(--bg-fallback-end));
+      background-size: cover, auto;
+      background-position: center, center;
+      background-repeat: no-repeat;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+    }
+
+    .wrap{
+      width:100%;
+      padding:20px;
+      box-sizing:border-box;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      min-height:100vh;
+    }
+
+    header{
+      width:100%;
+      max-width:var(--max-width);
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      align-items:center;
+    }
+
+    .branding{
+      width:100%;
+      display:flex;
+      gap:12px;
+      align-items:center;
+    }
+
+    .branding img{
+      width:200px;
+      height:200px;
+      object-fit:contain;
+      border-radius:10px;
+      background:linear-gradient(180deg,#fff,#f3f4f6);
+      box-shadow: 0 6px 18px rgba(15,23,42,0.06);
+      display:block;
+    }
+
+    .logo-fallback{
+      width:200px;
+      height:200px;
+      border-radius:10px;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      background:linear-gradient(180deg,#fff,#f3f4f6);
+      box-shadow: 0 6px 18px rgba(15,23,42,0.06);
+    }
+    .logo-fallback svg{ width:200px; height:200px; display:block; }
+
+    h1.title{
+      font-size:28px;
+      margin:0;
+      letter-spacing:1px;
+      color:var(--heading-dark);
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    nav.navbar{
+      width:100%;
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:center;
+      padding:8px;
+      box-sizing:border-box;
+      background: rgba(255,255,255,0.95);
+      border-radius:12px;
+      border:1px solid rgba(15,23,42,0.06);
+      box-shadow: 0 12px 30px rgba(2,6,23,0.08);
+    }
+
+    .nav-btn{
+      background:linear-gradient(180deg,#fff,#f7fafc);
+      border:1px solid #e6e9ee;
+      padding:10px 14px;
+      border-radius:999px;
+      cursor:pointer;
+      font-weight:700;
+      color:var(--heading-dark);
+      box-shadow: 0 4px 8px rgba(15,23,42,0.04);
+      transition:transform var(--transition), box-shadow var(--transition), background var(--transition);
+      user-select:none;
+    }
+    .nav-btn:hover{ transform:translateY(-3px); box-shadow: 0 10px 24px rgba(15,23,42,0.06); }
+    .nav-btn.active{ background:var(--cta-bg); border-color:#cfe8ff; color:#fff; box-shadow: 0 10px 26px rgba(79,70,229,0.14); }
+
+    /* Internet section styles */
+    #view-internet { display:block; }
+    .internet-card { padding:18px; border-radius:12px; background: rgba(255,255,255,0.96); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border:1px solid rgba(15,23,42,0.06); box-shadow: 0 18px 40px rgba(2,6,23,0.12); color: var(--heading-dark); }
+    .internet-header { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+    .internet-tabs { display:flex; gap:8px; }
+    .internet-tab-btn { padding:8px 12px; border-radius:8px; font-weight:800; cursor:pointer; border:1px solid rgba(15,23,42,0.06); background: rgba(255,255,255,0.96); color: var(--heading-dark); }
+    .internet-tab-btn.active { background:var(--cta-bg); color:#fff; box-shadow: 0 8px 20px rgba(79,70,229,0.12); }
+    .internet-sub { margin-top:12px; display:block; }
+    .internet-sub.hidden { display:none; }
+    .plan-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap:12px; margin-top:12px; }
+    .plan-card { padding:12px; border-radius:10px; background: rgba(255,255,255,0.96); border:1px solid rgba(15,23,42,0.06); box-shadow: 0 10px 26px rgba(2,6,23,0.06); color: var(--heading-dark); }
+    .plan-provider { font-weight:900; font-size:1rem; color: var(--heading-dark); }
+    .plan-meta { color:var(--meta-dark); font-weight:800; font-size:0.92rem; margin-top:6px; }
+    .plan-cta { margin-top:10px; display:inline-block; padding:8px 10px; border-radius:8px; background:var(--cta-bg); color:#fff; font-weight:900; text-decoration:none; }
+
+    /* Stats bar near feedback */
+    #new2aus-stats {
+      position: fixed; right: 18px; bottom: 110px; z-index: 1600; width: 320px; max-width: calc(100% - 40px);
+      box-sizing:border-box; padding:12px; border-radius:12px; background: rgba(255,255,255,0.94);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border:1px solid rgba(15,23,42,0.06);
+      box-shadow: 0 18px 40px rgba(2,6,23,0.12); color: var(--heading-dark); font-weight:800;
+    }
+    #new2aus-stats .row { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px; }
+    #new2aus-stats .label { font-weight:900; color:var(--heading-dark); }
+    #new2aus-stats button.stat-btn { padding:8px 10px; border-radius:8px; border:0; cursor:pointer; font-weight:900; }
+    #new2aus-stats button.like-btn { background: linear-gradient(90deg,#ff6b81,#ff375f); color:#fff; }
+    #new2aus-stats button.subscribe-btn { background:#06b6d4; color:#07202a; }
+    #new2aus-stats input[type="email"] { padding:8px; border-radius:8px; border:1px solid rgba(15,23,42,0.06); width:100%; box-sizing:border-box; margin-top:6px; background:rgba(255,255,255,0.98); color:var(--heading-dark); font-weight:800; }
+    @media (max-width:420px){ #new2aus-stats { right:10px; left:10px; bottom:96px; width:auto; } }
+
+    main{
+      width:100%;
+      max-width:var(--max-width);
+      margin-top:16px;
+      padding-bottom:24px;
+      box-sizing:border-box;
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+    }
+
+    /* Hero */
+    .hero{
+      background:transparent; /* keep unified background visible */
+      border-radius:var(--radius);
+      padding:20px;
+      text-align:center;
+      color:var(--heading-dark);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+    .hero p{ margin:0; font-size:16px; max-width:900px; margin-left:auto; margin-right:auto; }
+
+    /* Views container */
+    .views{
+      position:relative;
+      min-height:360px;
+    }
+    .view{
+      position:absolute;
+      inset:0;
+      padding:22px;
+      box-sizing:border-box;
+      border-radius:var(--radius);
+      opacity:0;
+      transform:translateY(8px) scale(.995);
+      pointer-events:none;
+      transition:opacity var(--transition), transform var(--transition);
+      overflow:auto;
+      background: var(--card-bg);
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(15,23,42,0.03);
+    }
+    .view.visible{
+      opacity:1;
+      transform:none;
+      pointer-events:auto;
+      z-index: 1;
+    }
+
+    .view-inner{
+      display:flex;
+      gap:18px;
+      flex-direction:column;
+      max-width:1000px;
+      margin:0 auto;
+    }
+
+    .section-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .section-header h2{ margin:0; font-size:20px; color:var(--heading-dark); }
+    .section-desc{ color:var(--muted); font-size:15px; }
+
+    /* Identity section on Home */
+    .identity-section{
+      margin-top:14px;
+      display:flex;
+      gap:14px;
+      flex-direction:column;
+    }
+    .doc-cards{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+      gap:12px;
+    }
+    .doc-card{
+      background: #fff;
+      border-radius:10px;
+      padding:12px;
+      border:1px solid #eef2f6;
+      box-shadow: 0 6px 16px rgba(7,20,40,0.04);
+    }
+    .doc-card h3{ margin:0 0 6px 0; font-size:15px; color:var(--heading-dark); }
+    .doc-card ul{ margin:6px 0 0 18px; color:var(--muted); font-size:14px; }
+
+    .callout{
+      margin-top:12px;
+      padding:12px 14px;
+      border-radius:10px;
+      background:linear-gradient(90deg,#fff8e6,#fffefb);
+      border-left:4px solid #ffb020;
+      box-shadow: 0 6px 14px rgba(245,160,50,0.06);
+      color:#3b2f00;
+      font-size:14px;
+    }
+
+    /* Links grid and cards */
+    .links-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; margin-top:12px; }
+    .link-card{
+      background:#fff; border-radius:12px; padding:14px; display:flex; gap:12px; align-items:center;
+      box-shadow: 0 6px 16px rgba(15,23,42,0.04); border:1px solid #eef2f6; text-decoration:none; color:inherit;
+      transition:transform var(--transition), box-shadow var(--transition);
+    }
+    .link-card:hover{ transform:translateY(-6px); box-shadow: 0 14px 32px rgba(15,23,42,0.08); }
+    .link-icon{ width:44px; height:44px; border-radius:10px; background:linear-gradient(135deg,#f5f8ff,#eff8ff); display:flex; align-items:center; justify-content:center; font-weight:700; color:var(--accent); flex-shrink:0; }
+    .link-body{ display:flex; flex-direction:column; }
+    .link-title{ font-weight:700; font-size:14px; color:var(--heading-dark); }
+    .link-sub{ font-size:13px; color:var(--muted); margin-top:3px; }
+
+    /* Footer */
+    footer{
+      width:100%;
+      max-width:var(--max-width);
+      margin-top:18px;
+      background:rgba(255,255,255,0.98);
+      border-radius:12px;
+      padding:16px;
+      box-sizing:border-box;
+      box-shadow: 0 8px 28px rgba(7,20,40,0.06);
+      display:flex;
+      gap:14px;
+      align-items:flex-start;
+      flex-wrap:wrap;
+    }
+
+    .feedback-left{ flex:1 1 360px; min-width:260px; }
+    .feedback-right{ width:320px; min-width:240px; }
+    .form-row{ display:flex; gap:8px; margin-bottom:8px; flex-wrap:wrap; }
+    .input, textarea, select{ width:100%; padding:10px 12px; border-radius:10px; border:1px solid #e6e9ee; background:#fff; box-sizing:border-box; font-size:14px; color:var(--body-dark); }
+    textarea{ min-height:86px; resize:vertical; }
+    .btn{ background:var(--accent); color:#fff; border:none; padding:10px 14px; border-radius:10px; font-weight:700; cursor:pointer; box-shadow: 0 6px 14px rgba(31,111,235,0.14); }
+    .btn.secondary{ background:#fff; color:var(--accent); border:1px solid #e6e9ee; }
+    .published{ margin-top:8px; display:flex; flex-direction:column; gap:8px; }
+    .pub-item{ background:#fff; border-radius:10px; padding:10px; border:1px solid #eef2f6; box-shadow: 0 6px 12px rgba(7,20,40,0.03); }
+    .pub-meta{ font-size:12px; color:var(--muted); margin-bottom:6px; }
+
+    .cta-btn {
+      background: var(--cta-bg);
+      color: #fff;
+      font-weight: 800;
+      padding: .6rem .9rem;
+      border-radius: 10px;
+      border: 0;
+      box-shadow: 0 8px 20px rgba(79,70,229,0.18);
+      text-decoration: none;
+    }
+
+    /* Accessibility helpers */
+    .meta { color: var(--meta-dark); font-weight: 800; }
+
+    /* responsive */
+    @media(min-width:880px){
+      .view-inner{ flex-direction:row; align-items:flex-start; }
+      .section-desc{ max-width:640px; }
+      .feedback-right{ width:360px; }
+      .identity-section{ flex-direction:row; align-items:flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <div class="site-bg">
+    <div class="wrap">
+      <header>
+        <div class="branding" role="banner">
+          <img id="logoImg" src="images/logo.png" alt="NEW2AUS Logo" width="200" height="200" />
+          <div id="logoFallback" class="logo-fallback" aria-hidden="true" title="NEW2AUS logo">
+            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="NEW2AUS logo">
+              <defs><linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#1f6feb"/><stop offset="1" stop-color="#6fb7ff"/></linearGradient></defs>
+              <rect rx="10" width="200" height="200" fill="url(#g1)"></rect>
+              <g transform="translate(8,8)" fill="#fff" font-family="Arial, Helvetica, sans-serif">
+                <text x="0" y="18" font-size="18" font-weight="800">NEW</text>
+                <text x="0" y="38" font-size="18" font-weight="800">2AUS</text>
+              </g>
+            </svg>
+          </div>
+
+          <div>
+            <h1 class="title">NEW2AUS</h1>
+            <div style="font-size:16px;color:var(--muted);margin-top:6px">Your All-in-One Settlement Portal for Australia</div>
+          </div>
+        </div>
+
+        <nav class="navbar" role="navigation" aria-label="Main categories">
+          <button class="nav-btn" data-view="home">Home</button>
+          <button class="nav-btn" data-view="jobs">Jobs</button>
+          <button class="nav-btn" data-view="vehicle">Vehicle Details</button>
+          <button class="nav-btn" data-view="transport">Transport</button>
+          <button class="nav-btn" data-view="medicare">Medicare &amp; Health</button>
+          <button class="nav-btn" data-view="gov">Government ID</button>
+          <button class="nav-btn" data-view="shopping">Shopping &amp; Groceries</button>
+          <button class="nav-btn" data-view="places">Places of Worship</button>
+          <button class="nav-btn" data-view="internet">Internet</button>
+        </nav>
+      </header>
+
+      <main>
+        <section class="hero" aria-labelledby="hero-heading">
+          <p id="hero-heading">
+            Welcome to NEW2AUS – Your All-in-One Settlement Portal for Australia. Select any category above to access trusted external direct links, services, and guides for settling smoothly in Australia.
+          </p>
+        </section>
+
+        <section class="views" id="views" aria-live="polite">
+          <!-- Home -->
+          <article id="view-home" class="view visible" role="region" aria-label="Home view">
+            <div class="view-inner">
+              <div style="flex:1">
+                <div class="section-header">
+                  <h2>Home</h2>
+                </div>
+                <p class="section-desc" style="margin-top:8px">
+                  Use the navigation above to open curated external resources for jobs, transport, health, ID, shopping and community services across Australian capitals. Each category opens trusted services in a new tab.
+                </p>
+
+                <!-- Identity Documents section -->
+                <div class="identity-section" aria-label="Identity documents needed">
+                  <div class="doc-cards">
+                    <div class="doc-card">
+                      <h3>Primary Identity Documents</h3>
+                      <ul>
+                        <li>Passport (current, bio-data page)</li>
+                        <li>Birth certificate (original or certified copy)</li>
+                        <li>Driver licence (if available)</li>
+                      </ul>
+                    </div>
+                    <div class="doc-card">
+                      <h3>Secondary Identity Documents</h3>
+                      <ul>
+                        <li>Utility bill or bank statement (within 3 months)</li>
+                        <li>Medicare card or private health insurance details</li>
+                        <li>Proof of address (rental agreement or official letter)</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div class="callout" role="note" aria-live="polite">
+                    Important: Anyone working with children (paid or volunteer) must apply for a Working With Vulnerable People/Working With Children card — for example, the WWVP Card via Access Canberra or your local state/territory government service centre. Check your state/territory requirements and apply before commencing child-related work.
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </article>
+
+          <!-- Jobs -->
+          <article id="view-jobs" class="view" role="region" aria-label="Jobs and employment resources">
+            <div class="view-inner"><div style="flex:1">
+              <div class="section-header"><h2>Jobs in Australia</h2></div>
+              <p class="section-desc" style="margin-top:8px">
+                Tips: tailor your resume to Australian formats, use keywords from job ads, set up alerts on major job boards, network via LinkedIn and local community groups. Consider temporary roles while you settle, and check visa conditions for work rights.
+              </p>
+
+              <div class="links-grid" style="margin-top:12px">
+                <a class="link-card" href="https://www.seek.com.au/" target="_blank" rel="noopener noreferrer"><div class="link-icon">S</div><div class="link-body"><div class="link-title">Seek</div><div class="link-sub">Australia's largest job board</div></div></a>
+                <a class="link-card" href="https://au.indeed.com/" target="_blank" rel="noopener noreferrer"><div class="link-icon">I</div><div class="link-body"><div class="link-title">Indeed Australia</div><div class="link-sub">Search, company reviews & salary info</div></div></a>
+                <a class="link-card" href="https://www.linkedin.com/jobs/" target="_blank" rel="noopener noreferrer"><div class="link-icon">in</div><div class="link-body"><div class="link-title">LinkedIn Jobs</div><div class="link-sub">Professional networking & job listings</div></div></a>
+                <a class="link-card" href="https://au.jora.com/" target="_blank" rel="noopener noreferrer"><div class="link-icon">J</div><div class="link-body"><div class="link-title">Jora</div><div class="link-sub">Job aggregator across Australia</div></div></a>
+                <a class="link-card" href="https://www.facebook.com/jobs/" target="_blank" rel="noopener noreferrer"><div class="link-icon">f</div><div class="link-body"><div class="link-title">Facebook Job Groups</div><div class="link-sub">Community and local group listings</div></div></a>
+              </div>
+
+            </div></div>
+          </article>
+
+          <!-- Vehicle -->
+          <article id="view-vehicle" class="view" role="region" aria-label="Vehicle buying and registration">
+            <div class="view-inner"><div style="flex:1">
+              <div class="section-header"><h2>Vehicle Details: Buying, Registration & Ownership</h2></div>
+              <p class="section-desc" style="margin-top:8px">
+                Buying new vs used: new cars give warranty & certainty while used cars may offer savings—always obtain a roadworthy check for used vehicles. Registration is state-based; ensure you transfer title and check any outstanding finance. Owner sales & dealerships both have pros—get receipts and check historical reports.
+              </p>
+
+              <div class="links-grid" style="margin-top:12px">
+                <a class="link-card" href="https://www.carsales.com.au/" target="_blank" rel="noopener noreferrer"><div class="link-icon">CS</div><div class="link-body"><div class="link-title">Carsales</div><div class="link-sub">Large marketplace for new & used cars</div></div></a>
+                <a class="link-card" href="https://www.cars24.com/au/" target="_blank" rel="noopener noreferrer"><div class="link-icon">24</div><div class="link-body"><div class="link-title">Cars24 Australia</div><div class="link-sub">Online used car marketplace</div></div></a>
+                <a class="link-card" href="https://www.gumtree.com.au/cars" target="_blank" rel="noopener noreferrer"><div class="link-icon">G</div><div class="link-body"><div class="link-title">Gumtree Cars</div><div class="link-sub">Private sales & classifieds</div></div></a>
+                <a class="link-card" href="https://www.facebook.com/marketplace/" target="_blank" rel="noopener noreferrer"><div class="link-icon">M</div><div class="link-body"><div class="link-title">Facebook Marketplace</div><div class="link-sub">Local owner sales & offers</div></div></a>
+                <a class="link-card" href="https://www.carsguide.com.au/dealers" target="_blank" rel="noopener noreferrer"><div class="link-icon">D</div><div class="link-body"><div class="link-title">Dealership Search</div><div class="link-sub">Find local dealers & services</div></div></a>
+              </div>
+
+            </div></div>
+          </article>
+
+          <!-- Transport -->
+          <article id="view-transport" class="view" role="region" aria-label="Interstate and local transport">
+            <div class="view-inner"><div style="flex:1">
+              <div class="section-header"><h2>Transport — Interstate Travel & Public Transit</h2></div>
+              <p class="section-desc" style="margin-top:8px">
+                Interstate travel: flights (Qantas, Virgin) are fastest between capitals; long-distance trains/coaches are available for budget travel. Local public transit fares vary by city (Opal, Myki, Translink, MyWay). Use local travel cards/apps for best fares; consider concession rules if eligible.
+              </p>
+
+              <div class="links-grid" style="margin-top:12px">
+                <a class="link-card" href="https://transportnsw.info/" target="_blank" rel="noopener noreferrer"><div class="link-icon">Op</div><div class="link-body"><div class="link-title">Transport NSW (Opal)</div><div class="link-sub">Sydney & NSW public transport information</div></div></a>
+                <a class="link-card" href="https://www.ptv.vic.gov.au/" target="_blank" rel="noopener noreferrer"><div class="link-icon">PTV</div><div class="link-body"><div class="link-title">PTV Victoria (Myki)</div><div class="link-sub">Melbourne public transport information</div></div></a>
+                <a class="link-card" href="https://translink.com.au/" target="_blank" rel="noopener noreferrer"><div class="link-icon">TL</div><div class="link-body"><div class="link-title">Translink QLD</div><div class="link-sub">Queensland public transport</div></div></a>
+                <a class="link-card" href="https://www.accesscanberra.act.gov.au/" target="_blank" rel="noopener noreferrer"><div class="link-icon">AC</div><div class="link-body"><div class="link-title">Access Canberra / MyWay</div><div class="link-sub">Canberra transport & services</div></div></a>
+                <a class="link-card" href="https://www.qantas.com/" target="_blank" rel="noopener noreferrer"><div class="link-icon">QF</div><div class="link-body"><div class="link-title">Qantas</div><div class="link-sub">Domestic & international flights</div></div></a>
+                <a class="link-card" href="https://www.virginaustralia.com/" target="_blank" rel="noopener noreferrer"><div class="link-icon">VA</div><div class="link-body"><div class="link-title">Virgin Australia</div><div class="link-sub">Domestic flight options</div></div></a>
+              </div>
+
+            </div></div>
+          </article>
+
+          <!-- Medicare -->
+          <article id="view-medicare" class="view" role="region" aria-label="Medicare and health services">
+            <div class="view-inner"><div style="flex:1">
+              <div class="section-header"><h2>Medicare &amp; Health</h2></div>
+              <p class="section-desc" style="margin-top:8px">
+                Enrolling in Medicare: check your eligibility and enrol via Services Australia. For day-to-day care, search for bulk-billing GPs and clinics using appointment platforms. Keep prescriptions and immunisation records handy.
+              </p>
+
+              <div class="links-grid" style="margin-top:12px">
+                <a class="link-card" href="https://www.servicesaustralia.gov.au/individuals/medicare" target="_blank" rel="noopener noreferrer"><div class="link-icon">MS</div><div class="link-body"><div class="link-title">Services Australia — Medicare</div><div class="link-sub">Official Medicare information & enrolment</div></div></a>
+                <a class="link-card" href="https://www.hotdoc.com.au/" target="_blank" rel="noopener noreferrer"><div class="link-icon">H</div><div class="link-body"><div class="link-title">HotDoc</div><div class="link-sub">Book appointments & find bulk-billing GPs</div></div></a>
+                <a class="link-card" href="https://healthengine.com.au/" target="_blank" rel="noopener noreferrer"><div class="link-icon">HE</div><div class="link-body"><div class="link-title">HealthEngine</div><div class="link-sub">Find GPs, specialists, and reviews</div></div></a>
+                <a class="link-card" href="https://www.chemistwarehouse.com.au/" target="_blank" rel="noopener noreferrer"><div class="link-icon">CW</div><div class="link-body"><div class="link-title">Chemist Warehouse</div><div class="link-sub">Pharmacy & prescription services</div></div></a>
+              </div>
+
+            </div></div>
+          </article>
+
+          <!-- Government ID -->
+          <article id="view-gov" class="view" role="region" aria-label="Government ID and proof of identity">
+            <div class="view-inner"><div style="flex:1">
+              <div class="section-header">
+                <h2>Government ID — Proof of Age & State Identity</h2>
+                <div style="min-width:220px;">
+                  <label for="stateSelect" style="display:block;font-size:13px;color:var(--muted);margin-bottom:6px">Select state / territory</label>
+                  <select id="stateSelect" aria-label="Select state for identity information">
+                    <option value="NSW">New South Wales (NSW)</option>
+                    <option value="VIC">Victoria (VIC)</option>
+                    <option value="QLD">Queensland (QLD)</option>
+                    <option value="WA">Western Australia (WA)</option>
+                    <option value="SA">South Australia (SA)</option>
+                    <option value="TAS">Tasmania (TAS)</option>
+                    <option value="ACT">Australian Capital Territory (ACT)</option>
+                    <option value="NT">Northern Territory (NT)</option>
+                  </select>
+                </div>
+              </div>
+
+              <p class="section-desc" style="margin-top:8px">
+                Each state and territory issues identity documents. Choose your state or territory above for direct links, required documents, and application pages for proof-of-age or photo ID cards.
+              </p>
+
+              <div id="gov-links" class="links-grid" style="margin-top:12px"></div>
+
+            </div></div>
+          </article>
+
+          <!-- Shopping -->
+          <article id="view-shopping" class="view" role="region" aria-label="Grocery and shopping resources">
+            <div class="view-inner"><div style="flex:1">
+              <div class="section-header">
+                <h2>Shopping &amp; Groceries</h2>
+                <div>
+                  <button class="btn" data-view="shopping" data-sub="supermarkets">Supermarkets</button>
+                  <button class="btn secondary" data-view="shopping" data-sub="cultural">Cultural Grocers</button>
+                </div>
+              </div>
+
+              <p class="section-desc" style="margin-top:8px">Major supermarkets offer online ordering & delivery. For cultural groceries, search local Indian grocers and markets—many cities have specialist stores and weekend markets.</p>
+
+              <div id="shopping-subcontent" style="margin-top:12px">
+                <div data-subcontent="supermarkets">
+                  <div class="links-grid">
+                    <a class="link-card" href="https://www.woolworths.com.au/" target="_blank" rel="noopener noreferrer"><div class="link-icon">W</div><div class="link-body"><div class="link-title">Woolworths</div><div class="link-sub">Online groceries & delivery</div></div></a>
+                    <a class="link-card" href="https://www.coles.com.au/" target="_blank" rel="noopener noreferrer"><div class="link-icon">C</div><div class="link-body"><div class="link-title">Coles</div><div class="link-sub">Groceries, online ordering</div></div></a>
+                    <a class="link-card" href="https://www.aldi.com.au/" target="_blank" rel="noopener noreferrer"><div class="link-icon">A</div><div class="link-body"><div class="link-title">Aldi</div><div class="link-sub">Value groceries & weekly specials</div></div></a>
+                  </div>
+                </div>
+
+                <div data-subcontent="cultural" style="display:none">
+                  <div class="links-grid">
+                    <a class="link-card" href="https://www.google.com/maps/search/Indian+grocery+stores+in+Australia" target="_blank" rel="noopener noreferrer"><div class="link-icon">IG</div><div class="link-body"><div class="link-title">Indian Grocery Finder</div><div class="link-sub">Local cultural groceries (Maps search)</div></div></a>
+                    <a class="link-card" href="https://www.google.com/maps/search/farmers+markets+in+Australia" target="_blank" rel="noopener noreferrer"><div class="link-icon">FM</div><div class="link-body"><div class="link-title">Local Markets</div><div class="link-sub">Find weekend & farmers' markets</div></div></a>
+                  </div>
+                </div>
+              </div>
+
+            </div></div>
+          </article>
+
+          <!-- Places -->
+          <article id="view-places" class="view" role="region" aria-label="Places of Worship and Community">
+            <div class="view-inner"><div style="flex:1">
+              <div class="section-header">
+                <h2>Places of Worship &amp; Community</h2>
+                <div>
+                  <button class="btn" data-view="places" data-sub="religious">Religious</button>
+                  <button class="btn secondary" data-view="places" data-sub="community">Community</button>
+                </div>
+              </div>
+
+              <p class="section-desc" style="margin-top:8px">
+                Directory and map search links to find Hindu temples, churches, mosques (Islamic centres) and community associations & support networks across major Australian cities.
+              </p>
+
+              <div id="places-subcontent" style="margin-top:12px">
+                <div data-subcontent="religious">
+                  <div class="links-grid">
+                    <a class="link-card" href="https://www.google.com/maps/search/Hindu+temples+in+Australia" target="_blank" rel="noopener noreferrer"><div class="link-icon">HT</div><div class="link-body"><div class="link-title">Hindu Temples (Maps)</div><div class="link-sub">Find temples across Australian cities</div></div></a>
+                    <a class="link-card" href="https://www.google.com/maps/search/Buddhist+temples+in+Australia" target="_blank" rel="noopener noreferrer"><div class="link-icon">BT</div><div class="link-body"><div class="link-title">Buddhist Temples (Maps)</div><div class="link-sub">Find Buddhist temples, centres & meditation groups</div></div></a>
+                    <a class="link-card" href="https://www.google.com/maps/search/Churches+in+Australia" target="_blank" rel="noopener noreferrer"><div class="link-icon">CH</div><div class="link-body"><div class="link-title">Churches (Maps)</div><div class="link-sub">Find Christian churches & services</div></div></a>
+                    <a class="link-card" href="https://www.google.com/maps/search/Mosques+in+Australia" target="_blank" rel="noopener noreferrer"><div class="link-icon">MS</div><div class="link-body"><div class="link-title">Mosques / Islamic Centres (Maps)</div><div class="link-sub">Find mosques & community services</div></div></a>
+                  </div>
+                </div>
+
+                <div data-subcontent="community" style="display:none">
+                  <div class="links-grid">
+                    <a class="link-card" href="https://www.google.com/maps/search/community+associations+in+Australia" target="_blank" rel="noopener noreferrer"><div class="link-icon">CA</div><div class="link-body"><div class="link-title">Community Associations (Maps)</div><div class="link-sub">Support networks & local groups</div></div></a>
+                    <a class="link-card" href="https://hinducouncil.com.au/" target="_blank" rel="noopener noreferrer"><div class="link-icon">HC</div><div class="link-body"><div class="link-title">Hindu Council of Australia</div><div class="link-sub">National community & advocacy</div></div></a>
+                    <a class="link-card" href="https://www.meetup.com/" target="_blank" rel="noopener noreferrer"><div class="link-icon">MU</div><div class="link-body"><div class="link-title">Meetup</div><div class="link-sub">Local groups & social meetups</div></div></a>
+                    <a class="link-card" href="https://www.indianlink.com.au/" target="_blank" rel="noopener noreferrer"><div class="link-icon">IL</div><div class="link-body"><div class="link-title">Indian Community News</div><div class="link-sub">Community updates & events</div></div></a>
+                  </div>
+                </div>
+              </div>
+
+            </div></div>
+          </article>
+
+          <!-- INTERNET (NEW) -->
+          <article id="view-internet" class="view internet-card" role="region" aria-label="Internet view">
+            <div class="internet-header">
+              <div>
+                <h2 style="margin:0;font-weight:900;color:var(--heading-dark);">Internet — Mobile Data & Home WiFi</h2>
+                <div style="color:var(--meta-dark);font-weight:800;margin-top:6px">Compare prepaid SIM plans and home broadband packages.</div>
+              </div>
+              <div class="internet-tabs" role="tablist" aria-label="Internet tabs">
+                <button class="internet-tab-btn active" data-sub="mobile" type="button">Mobile Data Recharge</button>
+                <button class="internet-tab-btn" data-sub="home" type="button">Home WiFi</button>
+              </div>
+            </div>
+
+            <div class="internet-subcontent">
+              <div data-internet-sub="mobile" class="internet-sub">
+                <div class="plan-grid" aria-live="polite"></div>
+              </div>
+
+              <div data-internet-sub="home" class="internet-sub hidden">
+                <div class="plan-grid" aria-live="polite"></div>
+              </div>
+            </div>
+          </article>
+
+        </section> <!-- views -->
+      </main>
+
+      <!-- Feedback (KEEPING YOUR WORKING FORM AS-IS) -->
+      <footer class="card-light w-full max-w-6xl px-4 mt-6 rounded-lg" role="contentinfo" aria-label="Feedback and contact">
+        <div class="flex flex-col md:flex-row gap-4">
+          <div class="flex-1">
+            <div class="flex items-center justify-between">
+              <strong class="text-lg" style="color:var(--heading-dark)">Feedback</strong>
+              <span class="meta">We welcome constructive comments to improve NEW2AUS</span>
+            </div>
+
+            <div class="mt-3 space-y-2">
+              <input id="fb-name" class="p-2 rounded border w-full" placeholder="Your name" />
+              <textarea id="fb-text" class="p-2 rounded border w-full" rows="4" placeholder="Your feedback"></textarea>
+              <div class="flex items-center gap-3">
+                <button id="fb-submit" class="cta-btn">Publish Feedback</button>
+                <button id="fb-clear" class="p-2 rounded border">Clear</button>
+                <div id="fb-msg" class="meta"></div>
+              </div>
+            </div>
+
+            <div id="publishedList" class="mt-4 space-y-2"></div>
+          </div>
+
+          <div class="w-80">
+            <strong class="text-lg" style="color:var(--heading-dark)">How we handle feedback</strong>
+            <p class="body-text mt-2">Feedback is reviewed and displayed here if it is constructive and free of abusive language. Submissions containing inappropriate or abusive terms will be blocked and an alert shown.</p>
+          </div>
+        </div>
+      </footer>
+
+      <!-- Stats bar (Views, Likes, Subscribe) - positioned near feedback -->
+      <div id="new2aus-stats" aria-live="polite" role="status" aria-label="Page stats: views likes and subscribe">
+        <div class="row"><div class="label">👁️ Views:</div><div id="views-count" style="font-weight:900">0</div></div>
+        <div class="row"><div class="label">👍 Likes:</div><div><button id="likes-btn" class="stat-btn like-btn">Like</button> <span id="likes-count" style="font-weight:900;margin-left:8px">0</span></div></div>
+        <div class="row"><div class="label">🔔 Subscribe</div><div style="width:140px"><input id="subscribe-email" type="email" placeholder="you@example.com" aria-label="Subscribe email"></div></div>
+        <div class="row" style="margin-top:6px"><div></div><div><button id="subscribe-btn" class="stat-btn subscribe-btn">Subscribe</button></div></div>
+        <div id="stats-msg" style="margin-top:8px;font-size:0.95rem;color:var(--meta-dark);font-weight:800"></div>
+      </div>
+
+    </div> <!-- wrapper -->
+  </div>
+
+  <!-- JavaScript: defensive, wrapped in DOMContentLoaded -->
+  <script>
+  document.addEventListener('DOMContentLoaded', function () {
+    try {
+      /* helpers */
+      function safeText(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+      function lsGet(key, fallback){ try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; } catch(e){ return fallback; } }
+      function lsSet(key, val){ try { localStorage.setItem(key, JSON.stringify(val)); } catch(e){} }
+
+      /* Navigation SPA */
+      (function setupNavigation(){
+        try {
+          const navBtns = Array.from(document.querySelectorAll('.nav-btn'));
+          const views = Array.from(document.querySelectorAll('.view'));
+          const viewMap = {};
+          views.forEach(v => { if(v && v.id) viewMap[v.id.replace(/^view-/, '')] = v; });
+
+          function setActiveNav(view){
+            navBtns.forEach(b => b.classList.toggle('active', b.dataset.view === view));
+          }
+
+          function show(viewName = 'home', sub = null, replaceState = false){
+            if(!viewMap[viewName]) viewName = 'home';
+            Object.keys(viewMap).forEach(name => {
+              const el = viewMap[name];
+              if(name === viewName) el.classList.add('visible');
+              else el.classList.remove('visible');
+            });
+            setActiveNav(viewName);
+
+            if(viewName === 'gov'){
+              const stateCode = sub || document.getElementById('stateSelect')?.value || 'NSW';
+              renderGov(stateCode);
+            } else {
+              if(sub){
+                const container = document.getElementById('view-' + viewName);
+                if(container){
+                  const subContents = container.querySelectorAll('[data-subcontent]');
+                  subContents.forEach(sc => sc.style.display = sc.getAttribute('data-subcontent') === sub ? '' : 'none');
+                }
+              }
+            }
+
+            const state = { view: viewName, sub: sub || null };
+            const urlHash = '#' + viewName + (sub ? ('/' + sub) : '');
+            try {
+              if(replaceState) history.replaceState(state, '', urlHash);
+              else history.pushState(state, '', urlHash);
+            } catch(e){
+              location.hash = urlHash;
+            }
+
+            const heading = viewMap[viewName].querySelector('h2');
+            if(heading){ heading.setAttribute('tabindex','-1'); heading.focus(); }
+          }
+
+          navBtns.forEach(btn => btn.addEventListener('click', () => show(btn.dataset.view, null)));
+
+          document.addEventListener('click', (e) => {
+            const el = e.target.closest('[data-view]');
+            if(!el) return;
+            if(el.tagName.toLowerCase() === 'a' && el.href && (el.target === '_blank' || new URL(el.href, location.href).origin !== location.origin)) return;
+            e.preventDefault();
+            const view = el.getAttribute('data-view');
+            const sub = el.getAttribute('data-sub') || null;
+            show(view, sub);
+          });
+
+          function parseHash(){
+            const h = location.hash ? location.hash.replace(/^#/,'') : '';
+            if(!h) return { view: 'home', sub: null };
+            const parts = h.split('/');
+            const view = parts[0] || 'home';
+            const sub = parts[1] || null;
+            return { view, sub };
+          }
+
+          window.addEventListener('popstate', (ev) => {
+            const st = ev.state;
+            if(st && st.view) show(st.view, st.sub, true);
+            else { const info = parseHash(); show(info.view, info.sub, true); }
+          });
+
+          // initial
+          const info = (function(){ const h = location.hash.slice(1); if(!h) return {view:'home',sub:null}; const [v,s] = h.split('/'); return {view:v||'home',sub:s||null}; })();
+          show(info.view, info.sub, true);
+
+          window.NEW2AUS_show = show;
+        } catch(ex){ console.error('setupNavigation error', ex); }
+      })();
+
+      /* Government ID rendering */
+      const stateData = {
+        "NSW": { name: "New South Wales", links: [{ href: "https://www.service.nsw.gov.au/transaction/apply-photo-card", title: "Service NSW — Photo Card", desc: "NSW proof of age & photo card application" }, { href: "https://www.service.nsw.gov.au", title: "Service NSW", desc: "NSW Government services" }] },
+        "VIC": { name: "Victoria", links: [{ href: "https://www.vicroads.vic.gov.au/licences/driver-licences/proof-of-age-cards", title: "VicRoads — Proof of Age", desc: "Victoria identity card information" }, { href: "https://www.vic.gov.au", title: "Victoria Government", desc: "State government services" }] },
+        "QLD": { name: "Queensland", links: [{ href: "https://www.qld.gov.au/transport/licensing/identification/photo-id", title: "QLD Photo ID", desc: "Queensland photo identification" }, { href: "https://www.qld.gov.au", title: "Queensland Government", desc: "State government services" }] },
+        "WA": { name: "Western Australia", links: [{ href: "https://www.transport.wa.gov.au/licensing/licence-photo-cards.asp", title: "WA Photo Card (Licensing WA)", desc: "Western Australia identity & photo cards" }, { href: "https://www.wa.gov.au", title: "WA Government", desc: "State government services" }] },
+        "SA": { name: "South Australia", links: [{ href: "https://www.sa.gov.au/topics/driving-and-transport/licences/photo-identification", title: "SA Proof of Identity", desc: "South Australia ID & photo cards" }, { href: "https://www.sa.gov.au", title: "SA Government", desc: "State government services" }] },
+        "TAS": { name: "Tasmania", links: [{ href: "https://www.transport.tas.gov.au/licensing/photo_identification", title: "TAS Photo ID", desc: "Tasmania identity & photo ID information" }, { href: "https://www.transport.tas.gov.au", title: "Transport Tasmania", desc: "Licensing & ID services" }] },
+        "ACT": { name: "Australian Capital Territory", links: [{ href: "https://www.accesscanberra.act.gov.au/", title: "Access Canberra — Proof of Identity", desc: "ACT identity & ID services" }] },
+        "NT": { name: "Northern Territory", links: [{ href: "https://nt.gov.au/driving/licences/identification", title: "NT Identification", desc: "Northern Territory ID & photo card information" }, { href: "https://nt.gov.au", title: "NT Government", desc: "Territory government services" }] }
+      };
+
+      function renderGov(stateCode){
+        try {
+          const select = document.getElementById('stateSelect');
+          if(select && stateCode && select.value !== stateCode) select.value = stateCode;
+          const container = document.getElementById('gov-links');
+          if(!container) return;
+          container.innerHTML = '';
+          const data = stateData[stateCode] || stateData['NSW'];
+          const headerCard = document.createElement('div');
+          headerCard.className = 'pub-item';
+          headerCard.style.gridColumn = '1 / -1';
+          headerCard.innerHTML = '<div style="font-weight:700;margin-bottom:6px">' + (data.name || stateCode) + ' — Identity & Photo ID</div>'
+            + '<div style="color:var(--muted);font-size:13px">Use the links below for official state/territory identity and photo ID application pages.</div>';
+          container.appendChild(headerCard);
+          data.links.forEach(l => {
+            const a = document.createElement('a');
+            a.className = 'link-card';
+            a.href = l.href;
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            a.innerHTML = '<div class="link-icon">' + (l.title.split(' ').map(s=>s[0]).slice(0,2).join('')) + '</div>'
+              + '<div class="link-body"><div class="link-title">' + l.title + '</div>'
+              + '<div class="link-sub">' + (l.desc || '') + '</div></div>';
+            container.appendChild(a);
+          });
+        } catch(e){ console.error('renderGov error', e); }
+      }
+
+      document.addEventListener('change', (e) => {
+        const sel = e.target;
+        if(sel && sel.id === 'stateSelect'){
+          const code = sel.value;
+          try { renderGov(code); } catch(e){ console.error(e); }
+        }
+      });
+      // initial gov render
+      try { renderGov(document.getElementById('stateSelect')?.value || 'NSW'); } catch(e){}
+
+      /* Internet section (populate + tab switching) */
+      (function internetSection(){
+        try {
+          const mobilePlans = [
+            { provider: "Boost Mobile", network: "Optus", price: "$30 / 28 days", data: "40 GB", url: "https://boost.com.au/" },
+            { provider: "Felix Mobile", network: "Vodafone", price: "$25 / 28 days", data: "30 GB", url: "https://felixmobile.com.au/" },
+            { provider: "Amaysim", network: "Optus", price: "$20 / 28 days", data: "20 GB", url: "https://www.amaysim.com.au/" },
+            { provider: "Belong", network: "Telstra (MVNO)", price: "$35 / month", data: "Unlimited (fair use)", url: "https://www.belong.com.au/" }
+          ];
+          const homePlans = [
+            { provider: "TPG", speed: "100 Mbps", price: "$59.99 / month", setup: "$0 setup", modem: "Included", url: "https://www.tpg.com.au/" },
+            { provider: "Telstra 5G Home", speed: "5G Unlimited", price: "$80 / month", setup: "$0 promo", modem: "Included (5G gateway)", url: "https://www.telstra.com.au/" },
+            { provider: "Optus NBN", speed: "50/100 Mbps", price: "$69 / month", setup: "$0 setup", modem: "Included", url: "https://www.optus.com.au/" },
+            { provider: "SpinTel", speed: "100 Mbps", price: "$59 / month", setup: "$0 setup", modem: "BYO or included", url: "https://www.spintel.com.au/" }
+          ];
+
+          const mobileGrid = document.querySelector('#view-internet [data-internet-sub="mobile"] .plan-grid');
+          const homeGrid = document.querySelector('#view-internet [data-internet-sub="home"] .plan-grid');
+
+          function safe(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+          if(mobileGrid){
+            mobileGrid.innerHTML = '';
+            mobilePlans.forEach(p => {
+              const el = document.createElement('div');
+              el.className = 'plan-card';
+              el.innerHTML = '<div class="plan-provider">'+safe(p.provider)+'</div>'
+                + '<div class="plan-meta">'+safe(p.network)+' • '+safe(p.price)+' • '+safe(p.data)+'</div>'
+                + '<a class="plan-cta" href="'+safe(p.url)+'" target="_blank" rel="noopener noreferrer">Verify on Official Site</a>';
+              mobileGrid.appendChild(el);
+            });
+          }
+          if(homeGrid){
+            homeGrid.innerHTML = '';
+            homePlans.forEach(p => {
+              const el = document.createElement('div');
+              el.className = 'plan-card';
+              el.innerHTML = '<div class="plan-provider">'+safe(p.provider)+'</div>'
+                + '<div class="plan-meta">'+safe(p.speed)+' • '+safe(p.price)+'</div>'
+                + '<div style="color:var(--meta-dark);font-weight:800;margin-top:6px">'+safe(p.setup)+' • Modem: '+safe(p.modem)+'</div>'
+                + '<a class="plan-cta" href="'+safe(p.url)+'" target="_blank" rel="noopener noreferrer">Verify on Official Site</a>';
+              homeGrid.appendChild(el);
+            });
+          }
+
+          // tab switching
+          const tabButtons = document.querySelectorAll('#view-internet .internet-tab-btn');
+          function activateTab(sub, pushHistory=true){
+            tabButtons.forEach(b => b.classList.toggle('active', b.getAttribute('data-sub') === sub));
+            const mobileEl = document.querySelector('#view-internet [data-internet-sub="mobile"]');
+            const homeEl = document.querySelector('#view-internet [data-internet-sub="home"]');
+            if(sub === 'home'){ if(mobileEl) mobileEl.classList.add('hidden'); if(homeEl) homeEl.classList.remove('hidden'); }
+            else { if(homeEl) homeEl.classList.add('hidden'); if(mobileEl) mobileEl.classList.remove('hidden'); }
+            if(pushHistory){
+              try { history.pushState({view:'internet', sub}, '', '#internet/' + sub); } catch(e){}
+            }
+          }
+          tabButtons.forEach(btn => btn.addEventListener('click', function(){ activateTab(this.getAttribute('data-sub')); }));
+
+          window.setInternetSub = function(sub, replace=false){ activateTab(sub || 'mobile', !replace); };
+
+          const h = location.hash.slice(1);
+          if(h.startsWith('internet/')) {
+            const s = h.split('/')[1] || 'mobile';
+            activateTab(s, false);
+            const showFn = window.NEW2AUS_show;
+            if(typeof showFn === 'function') showFn('internet', s);
+          }
+        } catch(err){ console.error('Internet section error', err); }
+      })();
+
+      /* Stats bar (Views / Likes / Subscribe) */
+      (function statsBar(){
+        try {
+          const VIEWS_KEY = 'new2aus_views_total_v1';
+          const LIKES_KEY = 'new2aus_likes_total_v1';
+          const USER_LIKED_KEY = 'new2aus_user_liked_v1';
+          const SUB_KEY = 'new2aus_subscribers_v1';
+          const viewsEl = document.getElementById('views-count');
+          const likesEl = document.getElementById('likes-count');
+          const likesBtn = document.getElementById('likes-btn');
+          const subscribeBtn = document.getElementById('subscribe-btn');
+          const subscribeEmail = document.getElementById('subscribe-email');
+          const statsMsg = document.getElementById('stats-msg');
+
+          function safeGet(key, fallback){ try{ const v=localStorage.getItem(key); return v?JSON.parse(v):fallback; }catch(e){return fallback;} }
+          function safeSet(key,value){ try{ localStorage.setItem(key, JSON.stringify(value)); }catch(e){} }
+
+          // Views increment
+          let views = safeGet(VIEWS_KEY, 0) || 0; views = Number(views)+1; safeSet(VIEWS_KEY, views);
+          if(viewsEl) viewsEl.textContent = String(views);
+
+          // Likes
+          let likes = safeGet(LIKES_KEY, 0) || 0;
+          const userLiked = Boolean(safeGet(USER_LIKED_KEY, false));
+          if(likesEl) likesEl.textContent = String(likes);
+          if(likesBtn && userLiked){ likesBtn.disabled = true; likesBtn.textContent = 'Liked'; likesBtn.style.opacity='0.85'; }
+
+          if(likesBtn){
+            likesBtn.addEventListener('click', function(){
+              try {
+                const already = Boolean(safeGet(USER_LIKED_KEY, false));
+                if(already) return;
+                likes = Number(safeGet(LIKES_KEY, 0)) + 1;
+                safeSet(LIKES_KEY, likes);
+                safeSet(USER_LIKED_KEY, true);
+                if(likesEl) likesEl.textContent = String(likes);
+                likesBtn.disabled = true; likesBtn.textContent = 'Liked';
+                if(statsMsg){ statsMsg.style.color = '#0b6623'; statsMsg.textContent = 'Thanks — you liked this page!'; setTimeout(()=> statsMsg.textContent = '', 2500); }
+              } catch(e){ console.error('like error', e); }
+            });
+          }
+
+          // Subscribe
+          if(subscribeBtn && subscribeEmail){
+            subscribeBtn.addEventListener('click', function(){
+              try {
+                const em = (subscribeEmail.value || '').trim();
+                if(!/^\S+@\S+\.\S+$/.test(em)){ if(statsMsg){ statsMsg.style.color='#b04545'; statsMsg.textContent='Please enter a valid email.'; setTimeout(()=>statsMsg.textContent='',2500); } return; }
+                const list = safeGet(SUB_KEY, []);
+                if(Array.isArray(list) && list.indexOf(em) !== -1){ if(statsMsg){ statsMsg.style.color='#334155'; statsMsg.textContent='Already subscribed.'; setTimeout(()=>statsMsg.textContent='',2500); } subscribeEmail.value=''; return; }
+                list.push(em); safeSet(SUB_KEY, list);
+                if(statsMsg){ statsMsg.style.color='#0b6623'; statsMsg.textContent='Subscribed — thank you!'; setTimeout(()=>statsMsg.textContent='',3000); }
+                subscribeEmail.value='';
+              } catch(e){ console.error('subscribe error', e); }
+            });
+          }
+        } catch(err){ console.error('Stats bar error', err); }
+      })();
+
+      /* Logo fallback */
+      (function logoFallback(){
+        try {
+          const img = document.getElementById('logoImg');
+          const fallback = document.getElementById('logoFallback');
+          function showFallback(){ if(img) img.style.display = 'none'; if(fallback){ fallback.style.display = 'flex'; fallback.setAttribute('aria-hidden','false'); } }
+          if(img){
+            img.addEventListener('error', showFallback);
+            img.addEventListener('load', ()=>{ if(!img.naturalWidth || img.naturalWidth === 0) showFallback(); else { if(fallback){ fallback.style.display = 'none'; fallback.setAttribute('aria-hidden','true'); } img.style.display = 'block'; }});
+            window.addEventListener('load', ()=>{ setTimeout(()=>{ if(!img.complete || img.naturalWidth === 0) showFallback(); }, 50); });
+          } else { showFallback(); }
+        } catch(e){ console.error('logoFallback error', e); }
+      })();
+
+      /* Feedback (preserve and harden) */
+      (function feedbackHandling(){
+        try {
+          const submitBtn = document.getElementById('fb-submit');
+          const clearBtn = document.getElementById('fb-clear');
+          const nameInput = document.getElementById('fb-name');
+          const feedbackInput = document.getElementById('fb-text');
+          const publishedList = document.getElementById('publishedList');
+          const fmsg = document.getElementById('fb-msg');
+
+          const BAD_WORDS = [
+            "fuck","fucks","fucking","fuk","sh*t","shit","sht","crap","damn","bitch","bitches",
+            "asshole","arsehole","ass","arse","bastard","dick","d*ck","piss","pissed","slut","whore",
+            "bollocks","bugger","tosser","wanker","jerk","idiot","stupid","dumbass","moron","suck","sucks",
+            "suckers","scum","trash","trashbag","ratbag","filth"
+          ];
+
+          function toPattern(word){ const clean = word.replace(/[^a-z0-9]/ig,''); const chars = clean.split('').map(ch => ch.replace(/[-/\\^$*+?.()|[\]{}]/g,'\\$&')); const pattern = chars.join('[\\W_]*'); return '(?<![A-Za-z0-9])' + pattern + '(?![A-Za-z0-9])'; }
+          const BAD_PATTERNS = BAD_WORDS.map(toPattern);
+          const BAD_REGEX = new RegExp(BAD_PATTERNS.join('|'), 'i');
+          function normalizeLeet(s){ return s.toLowerCase().replace(/0/g,'o').replace(/4/g,'a').replace(/@/g,'a').replace(/1/g,'i').replace(/3/g,'e').replace(/\$/g,'s').replace(/[^\w]/g,''); }
+          function containsProfanity(text){ if(!text) return false; if(BAD_REGEX.test(text)) return true; const norm = normalizeLeet(text); const collapsed = norm.replace(/(.)\1+/g,'$1'); for(const w of BAD_WORDS){ const cw = w.replace(/[^a-z0-9]/gi,'').toLowerCase(); if(!cw) continue; if(collapsed.includes(cw)) return true; } return false; }
+
+          const STORAGE_KEY = 'new2aus_feedback_v3';
+          function loadFeedbacks(){ try { const raw = localStorage.getItem(STORAGE_KEY); if(!raw) return []; return JSON.parse(raw); } catch(e){ return []; } }
+          function saveFeedbacks(list){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); } catch(e){} }
+          function renderFeedbacks(){ const list = loadFeedbacks(); publishedList.innerHTML = ''; if(list.length === 0){ const p = document.createElement('div'); p.style.color = 'var(--muted)'; p.style.fontSize = '13px'; p.textContent = 'No feedback published yet.'; publishedList.appendChild(p); return; } list.slice().reverse().forEach(item => { const el = document.createElement('div'); el.className = 'pub-item'; const meta = document.createElement('div'); meta.className = 'pub-meta'; const time = new Date(item.ts).toLocaleString(); meta.textContent = `${item.name || 'Anonymous'} • ${time}`; const body = document.createElement('div'); body.textContent = item.text; el.appendChild(meta); el.appendChild(body); publishedList.appendChild(el); }); }
+
+          function clearForm(){ if(nameInput) nameInput.value = ''; if(feedbackInput) feedbackInput.value = ''; if(fmsg) fmsg.textContent = ''; }
+
+          if(submitBtn && !submitBtn.__new2aus_bound){
+            submitBtn.__new2aus_bound = true;
+            submitBtn.addEventListener('click', function(e){
+              try {
+                e.preventDefault();
+                const name = (nameInput && nameInput.value || '').trim();
+                const text = (feedbackInput && feedbackInput.value || '').trim();
+                if(!text){ if(fmsg) fmsg.textContent = 'Please enter feedback before publishing.'; return; }
+                if(containsProfanity(name) || containsProfanity(text)){ alert('Inappropriate language detected. Please provide constructive feedback to help improve the site.'); return; }
+                const list = loadFeedbacks();
+                list.push({ name: name || 'Anonymous', text, ts: Date.now() });
+                saveFeedbacks(list);
+                renderFeedbacks();
+                clearForm();
+                if(fmsg) { fmsg.textContent = 'Thank you — your feedback has been published.'; setTimeout(()=> fmsg.textContent = '', 3500); }
+              } catch(err){ console.error('Feedback submit error', err); if(fmsg) fmsg.textContent = 'Could not submit feedback'; }
+            });
+          }
+
+          if(clearBtn && !clearBtn.__new2aus_bound){
+            clearBtn.__new2aus_bound = true;
+            clearBtn.addEventListener('click', function(){ try{ clearForm(); }catch(e){ console.error(e); } });
+          }
+
+          try { renderFeedbacks(); } catch(e){ console.error('renderFeedbacks error', e); }
+
+        } catch(err){ console.error('feedbackHandling error', err); }
+      })();
+
+      /* Visibility fixes for views that blended with background */
+      (function visibilityFixes(){
+        try {
+          // Inject overrides for card contrast to avoid blending into bg
+          if(!document.getElementById('new2aus-visibility-fixes')){
+            const css = `
+/* high-priority overrides to ensure cards are visible */
+.view .link-card,
+.view .plan-card,
+.view .doc-card,
+.view .card-light,
+.view .card-dark {
+  background: #ffffff !important;
+  color: var(--heading-dark) !important;
+  border: 1px solid rgba(15,23,42,0.10) !important;
+  box-shadow: 0 18px 40px rgba(2,6,23,0.12) !important;
+  padding: 14px !important;
+  border-radius: 12px !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  opacity: 1 !important;
+}
+.view.visible { z-index: 1 !important; }
+#new2aus-stats { z-index: 1200 !important; }
+`;
+            const st = document.createElement('style');
+            st.id = 'new2aus-visibility-fixes';
+            st.appendChild(document.createTextNode(css));
+            document.head.appendChild(st);
+          }
+
+          // Small defensive cleanup function to reveal hidden children in visible view
+          function cleanupVisibleView(viewEl){
+            if(!viewEl) return;
+            try {
+              const hiddenNodes = viewEl.querySelectorAll('[style*="display:none"], .hidden, [aria-hidden="true"], [style*="opacity:0"], [style*="visibility:hidden"]');
+              hiddenNodes.forEach(n => {
+                try {
+                  // remove hide styles
+                  const s = n.getAttribute('style') || '';
+                  let newStyle = s.replace(/display\s*:\s*none;?/gi,'').replace(/visibility\s*:\s*hidden;?/gi,'').replace(/opacity\s*:\s*0;?/gi,'');
+                  if(newStyle.trim() === '') n.removeAttribute('style'); else n.setAttribute('style', newStyle);
+                } catch(e){}
+                try { n.classList.remove('hidden'); } catch(e){}
+                try { n.removeAttribute('aria-hidden'); } catch(e){}
+                try { if(!n.style.display) n.style.display = 'block'; } catch(e){}
+                try { n.style.visibility = 'visible'; } catch(e){}
+                try { n.style.opacity = '1'; } catch(e){}
+              });
+
+              // enforce grid visibility
+              const grids = viewEl.querySelectorAll('.links-grid, .plan-grid, .doc-cards');
+              grids.forEach(g => { try { g.style.display = 'grid'; g.style.opacity='1'; g.style.visibility='visible'; } catch(e){} });
+
+            } catch(err){ console.error('cleanupVisibleView', err); }
+          }
+
+          // Run on initial visible view
+          const initial = document.querySelector('.view.visible');
+          if(initial) cleanupVisibleView(initial);
+
+          // Observe class changes (when a view becomes visible)
+          const views = document.querySelectorAll('.view');
+          const mo = new MutationObserver(muts => {
+            muts.forEach(m => {
+              if(m.type === 'attributes' && m.attributeName === 'class' && m.target.classList.contains('visible')){
+                cleanupVisibleView(m.target);
+              }
+              if(m.type === 'childList'){
+                const parentView = m.target.closest && m.target.closest('.view');
+                if(parentView && parentView.classList.contains('visible')) cleanupVisibleView(parentView);
+              }
+            });
+          });
+          views.forEach(v => { try{ mo.observe(v, { attributes:true, childList:true, subtree:true }); } catch(e){} });
+
+          // Also attach to nav clicks as fallback
+          const navBtns = document.querySelectorAll('.nav-btn');
+          navBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+              setTimeout(()=> {
+                const cur = document.querySelector('.view.visible') || document.querySelector('.view');
+                cleanupVisibleView(cur);
+              }, 150);
+            });
+          });
+
+          // Re-run shortly after load to catch lazy-rendered elements
+          setTimeout(()=> { const cur = document.querySelector('.view.visible') || document.querySelector('.view'); cleanupVisibleView(cur); }, 350);
+          setTimeout(()=> { const cur = document.querySelector('.view.visible') || document.querySelector('.view'); cleanupVisibleView(cur); }, 1000);
+        } catch(e){ console.error('visibilityFixes error', e); }
+      })();
+
+    } catch(outerErr){
+      console.error('NEW2AUS main error (caught):', outerErr);
+    }
+  });
+  </script>
+</body>
+</html>
