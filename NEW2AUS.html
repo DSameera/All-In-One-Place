@@ -151,49 +151,44 @@
 
     /* Stats bar near feedback */
     /* Compact Stats Bar */
+/* Minimalist Single View Badge */
 #new2aus-stats {
   position: fixed;
   right: 18px;
   bottom: 20px;
   z-index: 1600;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 12px;
   padding: 6px 14px;
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(15, 23, 42, 0.85); /* డార్క్ క్లాసీ బ్యాక్‌గ్రౌండ్ */
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  box-shadow: 0 4px 15px rgba(2, 6, 23, 0.08);
-  color: var(--heading-dark);
+  color: #ffffff;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 #new2aus-stats .stat-item {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
 }
 
-#new2aus-stats button.like-btn {
-  background: transparent;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  color: var(--heading-dark);
-  font-size: 13px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 4px;
+#new2aus-stats svg {
+  color: #38bdf8; /* అందమైన లైట్ బ్లూ ఐకాన్ */
+}
+
+#new2aus-stats .view-label {
+  opacity: 0.8;
+  font-size: 12px;
 }
 
 @media (max-width: 420px) {
   #new2aus-stats {
-    right: 10px;
-    bottom: 20px;
+    right: 12px;
+    bottom: 16px;
   }
 }
     main{
@@ -608,14 +603,7 @@
                   </div>
                 </div>
 
-                <div data-subcontent="community" style="display:none">
-                  <div class="links-grid">
-                    <a class="link-card" href="https://www.google.com/maps/search/community+associations+in+Australia" target="_blank" rel="noopener noreferrer"><div class="link-icon">CA</div><div class="link-body"><div class="link-title">Community Associations (Maps)</div><div class="link-sub">Support networks & local groups</div></div></a>
-                    <a class="link-card" href="https://hinducouncil.com.au/" target="_blank" rel="noopener noreferrer"><div class="link-icon">HC</div><div class="link-body"><div class="link-title">Hindu Council of Australia</div><div class="link-sub">National community & advocacy</div></div></a>
-                    <a class="link-card" href="https://www.meetup.com/" target="_blank" rel="noopener noreferrer"><div class="link-icon">MU</div><div class="link-body"><div class="link-title">Meetup</div><div class="link-sub">Local groups & social meetups</div></div></a>
-                    <a class="link-card" href="https://www.indianlink.com.au/" target="_blank" rel="noopener noreferrer"><div class="link-icon">IL</div><div class="link-body"><div class="link-title">Indian Community News</div><div class="link-sub">Community updates & events</div></div></a>
-                  </div>
-                </div>
+                
               </div>
 
             </div></div>
@@ -678,13 +666,17 @@
       </footer>
 
       <!-- Stats bar (Views, Likes, Subscribe) - positioned near feedback -->
-      <div id="new2aus-stats" aria-live="polite" role="status" aria-label="Page stats: views likes and subscribe">
-        <div class="row"><div class="label">👁️ Views:</div><div id="views-count" style="font-weight:900">0</div></div>
-        <div class="row"><div class="label">👍 Likes:</div><div><button id="likes-btn" class="stat-btn like-btn">Like</button> <span id="likes-count" style="font-weight:900;margin-left:8px">0</span></div></div>
-        <div class="row"><div class="label">🔔 Subscribe</div><div style="width:140px"><input id="subscribe-email" type="email" placeholder="you@example.com" aria-label="Subscribe email"></div></div>
-        <div class="row" style="margin-top:6px"><div></div><div><button id="subscribe-btn" class="stat-btn subscribe-btn">Subscribe</button></div></div>
-        <div id="stats-msg" style="margin-top:8px;font-size:0.95rem;color:var(--meta-dark);font-weight:800"></div>
-      </div>
+      <div id="new2aus-stats">
+  <div class="stat-item">
+    <!-- Clean Minimal Eye Icon -->
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+      <circle cx="12" cy="12" r="3"></circle>
+    </svg>
+    <span id="view-count">32</span>
+    <span class="view-label">views</span>
+  </div>
+</div>
 
     </div> <!-- wrapper -->
   </div>
