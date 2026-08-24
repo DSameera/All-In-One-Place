@@ -1121,6 +1121,21 @@
       console.error('NEW2AUS main error (caught):', outerErr);
     }
   });
+  // Global view counter logic
+const viewElem = document.getElementById('view-count');
+
+if (viewElem) {
+  fetch('https://counterapi.com/api/dsameera-allinoneplace/hits')
+    .then(response => response.json())
+    .then(data => {
+      if (data && data.value) {
+        viewElem.innerText = data.value;
+      }
+    })
+    .catch(err => {
+      console.error('Error updating views:', err);
+    });
+}
   </script>
 </body>
 </html>
