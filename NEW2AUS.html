@@ -1124,6 +1124,7 @@
   </script>
 
 <!-- Firebase Realtime Database Script -->
+<!-- Firebase Realtime Database Script -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getDatabase, ref, runTransaction, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -1139,20 +1140,32 @@
     measurementId: "G-MVQ9XL8LRP"
   };
 
-  // Firebase Initialize
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
-
-  // Realtime Global View Counter
   const viewsRef = ref(db, 'global_views');
-  
-  // 1. Increment View Count
+
+  // 1. Transaction పూర్తయ్యాక మాత్రమే UI అప్‌డేట్ చేయాలి
   runTransaction(viewsRef, (currentViews) => {
     return (currentViews || 0) + 1;
+  }).then((result) => {
+    if (result.committed) {
+      const updatedViews = result.snapshot.val();
+      const viewElem = document.getElementById('view-count');
+      if (viewElem) {
+        viewElem.innerText = 32 + updatedViews;
+      }
+    }
+  }).catch((error) => {
+    console.error("Error updating views:", error);
   });
 
-  // 2. Realtime UI Update
+  // 2. లైవ్ లో వేరే ఎవరైనా చూస్తే కౌంట్ అప్‌డేట్ అవ్వడానికి (మొదటి సారి జంప్ అవ్వకుండా నిరోధిస్తుంది)
+  let initialLoad = true;
   onValue(viewsRef, (snapshot) => {
+    if (initialLoad) {
+      initialLoad = false; // మొదటిసారి వచ్చే లాజిక్‌ను skip చేస్తుంది
+      return;
+    }
     const totalViews = snapshot.val() || 0;
     const viewElem = document.getElementById('view-count');
     if (viewElem) {
@@ -1160,7 +1173,6 @@
     }
   });
 </script>
-
 
   
 </body>
