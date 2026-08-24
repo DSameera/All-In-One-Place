@@ -1130,7 +1130,7 @@
 <!-- Firebase Realtime Database (Counter + Global Comments) -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getDatabase, ref, runTransaction, onValue, push, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+  import { getDatabase, ref, runTransaction, onValue, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyA126ZxqD2QeTSyWunQvEAvqk7KRm4JvmM",
@@ -1146,14 +1146,9 @@
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  // -------------------------------------------------------------
-  // 1. GLOBAL VIEW COUNTER
-  // -------------------------------------------------------------
+  // 1. GLOBAL VIEWS COUNTER
   const viewsRef = ref(db, 'global_views');
   const viewElem = document.getElementById('view-count');
-
-  const cachedViews = localStorage.getItem('last_known_views');
-  if (cachedViews && viewElem) viewElem.innerText = cachedViews;
 
   runTransaction(viewsRef, (currentViews) => {
     if (currentViews === null || currentViews === undefined || currentViews < 40) return 40;
@@ -1163,69 +1158,83 @@
   onValue(viewsRef, (snapshot) => {
     const totalViews = 32 + (snapshot.val() || 40);
     if (viewElem) viewElem.innerText = totalViews;
-    localStorage.setItem('last_known_views', totalViews);
   });
 
-  // -------------------------------------------------------------
-  // 2. GLOBAL COMMENTS / FEEDBACK
-  // -------------------------------------------------------------
+  // 2. GLOBAL FEEDBACK / COMMENTS (మీ పాత ఐడీలతో)
   const commentsRef = ref(db, 'global_comments');
-  const feedbackForm = document.getElementById('feedback-form'); // మీ ఫారమ్ ID చెక్ చేసుకోండి
-  const commentsContainer = document.getElementById('comments-list'); // కామెంట్స్ చూపే దివ్య/కంటైనర్ ID
 
-  // A. కొత్త కామెంట్‌ను Firebase లోకి పంపడం
-  if (feedbackForm) {
-    feedbackForm.addEventListener('submit', (e) => {
+  const nameInput = document.getElementById('fb-name');
+  const feedbackInput = document.getElementById('fb-text');
+  const submitBtn = document.getElementById('fb-submit');
+  const clearBtn = document.getElementById('fb-clear');
+  const publishedList = document.getElementById('publishedList');
+  const fmsg = document.getElementById('fb-msg');
+
+  if (submitBtn) {
+    submitBtn.onclick = (e) => {
       e.preventDefault();
       
-      const nameInput = document.getElementById('feedback-name') || document.getElementById('user-name');
-      const msgInput = document.getElementById('feedback-message') || document.getElementById('user-msg');
+      const name = (nameInput && nameInput.value || '').trim();
+      const message = (feedbackInput && feedbackInput.value || '').trim();
 
-      const name = nameInput ? nameInput.value.trim() : 'Anonymous';
-      const message = msgInput ? msgInput.value.trim() : '';
-
-      if (message !== '') {
-        push(commentsRef, {
-          name: name || 'Anonymous',
-          message: message,
-          timestamp: Date.now()
-        }).then(() => {
-          if (msgInput) msgInput.value = '';
-          alert('Comment submitted successfully!');
-        }).catch((err) => {
-          console.error('Comment Error:', err);
-        });
+      if (!message) {
+        if (fmsg) fmsg.textContent = 'Please enter feedback before publishing.';
+        return;
       }
-    });
+
+      push(commentsRef, {
+        name: name || 'Anonymous',
+        message: message,
+        timestamp: Date.now()
+      }).then(() => {
+        if (feedbackInput) feedbackInput.value = '';
+        if (nameInput) nameInput.value = '';
+        if (fmsg) {
+          fmsg.textContent = 'Thank you — your feedback has been published.';
+          setTimeout(() => fmsg.textContent = '', 3500);
+        }
+      }).catch((err) => {
+        console.error('Firebase Comment Error:', err);
+        if (fmsg) fmsg.textContent = 'Could not submit feedback.';
+      });
+    };
   }
 
-  // B. Firebase నుండి కామెంట్లను గ్లోబల్‌గా అందరి స్క్రీన్ పై రియల్‌టైమ్‌లో చూపించడం
+  if (clearBtn) {
+    clearBtn.onclick = (e) => {
+      e.preventDefault();
+      if (nameInput) nameInput.value = '';
+      if (feedbackInput) feedbackInput.value = '';
+      if (fmsg) fmsg.textContent = '';
+    };
+  }
+
+  // Firebase నుండి రియల్‌టైమ్‌లో గ్లోబల్ కామెంట్స్ UI లోకి లోడ్ చేయడం
   onValue(commentsRef, (snapshot) => {
-    if (!commentsContainer) return;
-    
-    commentsContainer.innerHTML = '';
+    if (!publishedList) return;
+    publishedList.innerHTML = '';
     const data = snapshot.val();
 
     if (data) {
-      // కామెంట్లను వరుస క్రమంలో (కొత్తవి పైన) చూపించడం
       const commentList = Object.values(data).reverse();
 
       commentList.forEach((c) => {
         const commentCard = document.createElement('div');
-        commentCard.className = 'comment-card';
-        commentCard.style.cssText = "background: #ffffff; padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.1);";
+        commentCard.className = 'pub-item';
         
-        const dateStr = new Date(c.timestamp).toLocaleDateString();
-        
+        const dateObj = new Date(c.timestamp);
+        const formattedDate = dateObj.toLocaleDateString() + ', ' + dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
         commentCard.innerHTML = `
-          <strong style="color: #0f172a;">${escapeHTML(c.name)}</strong> 
-          <small style="color: #64748b; float: right;">${dateStr}</small>
-          <p style="margin-top: 6px; color: #334155;">${escapeHTML(c.message)}</p>
+          <div class="pub-meta">
+            <strong>${escapeHTML(c.name)}</strong> • ${formattedDate}
+          </div>
+          <div style="margin-top: 4px;">${escapeHTML(c.message)}</div>
         `;
-        commentsContainer.appendChild(commentCard);
+        publishedList.appendChild(commentCard);
       });
     } else {
-      commentsContainer.innerHTML = '<p style="color: #64748b;">No comments yet. Be the first to comment!</p>';
+      publishedList.innerHTML = '<div style="color: var(--muted); font-size: 13px;">No feedback published yet.</div>';
     }
   });
 
