@@ -673,7 +673,7 @@
       <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
       <circle cx="12" cy="12" r="3"></circle>
     </svg>
-    <span id="view-count">32</span>
+    <span id="view-count">--</span>
     <span class="view-label">views</span>
   </div>
 </div>
@@ -1125,9 +1125,10 @@
 
 <!-- Firebase Realtime Database Script -->
 <!-- Firebase Realtime Database Script -->
+<!-- Firebase Realtime Database Script -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getDatabase, ref, runTransaction, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+  import { getDatabase, ref, runTransaction, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyA126ZxqD2QeTSyWunQvEAvqk7KRm4JvmM",
@@ -1143,35 +1144,35 @@
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
   const viewsRef = ref(db, 'global_views');
+  const viewElem = document.getElementById('view-count');
 
-  // 1. Transaction పూర్తయ్యాక మాత్రమే UI అప్‌డేట్ చేయాలి
-  runTransaction(viewsRef, (currentViews) => {
-    return (currentViews || 0) + 1;
-  }).then((result) => {
-    if (result.committed) {
-      const updatedViews = result.snapshot.val();
-      const viewElem = document.getElementById('view-count');
-      if (viewElem) {
-        viewElem.innerText = 32 + updatedViews;
+  async function updateAndShowViews() {
+    // ఒక సెషన్ లో ఒక్కసారి మాత్రమే కౌంట్ పెరుగుతుంది (జంప్ అవ్వకుండా రక్షిస్తుంది)
+    const hasVisited = sessionStorage.getItem('has_visited');
+
+    if (!hasVisited) {
+      try {
+        const result = await runTransaction(viewsRef, (current) => (current || 0) + 1);
+        if (result.committed) {
+          sessionStorage.setItem('has_visited', 'true');
+          if (viewElem) viewElem.innerText = 32 + result.snapshot.val();
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    } else {
+      // ఇప్పటికే చూసినట్లయితే కేవలం ఉన్న వ్యూస్ ని మాత్రమే తీసుకుంటుంది
+      try {
+        const snapshot = await get(viewsRef);
+        const currentViews = snapshot.val() || 0;
+        if (viewElem) viewElem.innerText = 32 + currentViews;
+      } catch (err) {
+        console.error(err);
       }
     }
-  }).catch((error) => {
-    console.error("Error updating views:", error);
-  });
+  }
 
-  // 2. లైవ్ లో వేరే ఎవరైనా చూస్తే కౌంట్ అప్‌డేట్ అవ్వడానికి (మొదటి సారి జంప్ అవ్వకుండా నిరోధిస్తుంది)
-  let initialLoad = true;
-  onValue(viewsRef, (snapshot) => {
-    if (initialLoad) {
-      initialLoad = false; // మొదటిసారి వచ్చే లాజిక్‌ను skip చేస్తుంది
-      return;
-    }
-    const totalViews = snapshot.val() || 0;
-    const viewElem = document.getElementById('view-count');
-    if (viewElem) {
-      viewElem.innerText = 32 + totalViews;
-    }
-  });
+  updateAndShowViews();
 </script>
 
   
