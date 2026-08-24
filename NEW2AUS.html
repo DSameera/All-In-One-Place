@@ -966,7 +966,7 @@
       })();
 
       /* Feedback (preserve and harden) */
-      (function feedbackHandling(){
+      /* (function feedbackHandling(){
         try {
           const submitBtn = document.getElementById('fb-submit');
           const clearBtn = document.getElementById('fb-clear');
@@ -990,7 +990,7 @@
 
           const STORAGE_KEY = 'new2aus_feedback_v3';
           function loadFeedbacks(){ try { const raw = localStorage.getItem(STORAGE_KEY); if(!raw) return []; return JSON.parse(raw); } catch(e){ return []; } }
-          function saveFeedbacks(list){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); } catch(e){} }
+          //function saveFeedbacks(list){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); } catch(e){} }
           function renderFeedbacks(){ const list = loadFeedbacks(); publishedList.innerHTML = ''; if(list.length === 0){ const p = document.createElement('div'); p.style.color = 'var(--muted)'; p.style.fontSize = '13px'; p.textContent = 'No feedback published yet.'; publishedList.appendChild(p); return; } list.slice().reverse().forEach(item => { const el = document.createElement('div'); el.className = 'pub-item'; const meta = document.createElement('div'); meta.className = 'pub-meta'; const time = new Date(item.ts).toLocaleString(); meta.textContent = `${item.name || 'Anonymous'} • ${time}`; const body = document.createElement('div'); body.textContent = item.text; el.appendChild(meta); el.appendChild(body); publishedList.appendChild(el); }); }
 
           function clearForm(){ if(nameInput) nameInput.value = ''; if(feedbackInput) feedbackInput.value = ''; if(fmsg) fmsg.textContent = ''; }
@@ -1022,9 +1022,10 @@
           try { renderFeedbacks(); } catch(e){ console.error('renderFeedbacks error', e); }
 
         } catch(err){ console.error('feedbackHandling error', err); }
-      })();
+      })(); 
+      */
 
-      /* Visibility fixes for views that blended with background */
+      /* Visibility fixes for views that blended with background */ 
       (function visibilityFixes(){
         try {
           // Inject overrides for card contrast to avoid blending into bg
