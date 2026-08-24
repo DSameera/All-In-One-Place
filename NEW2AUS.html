@@ -1125,9 +1125,10 @@
 
 <!-- Firebase Realtime Database Script -->
 <!-- Firebase Realtime Database Script -->
+<!-- Firebase Realtime Database Script -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getDatabase, ref, runTransaction, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+  import { getDatabase, ref, runTransaction, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyA126ZxqD2QeTSyWunQvEAvqk7KRm4JvmM",
@@ -1145,31 +1146,34 @@
   const viewsRef = ref(db, 'global_views');
   const viewElem = document.getElementById('view-count');
 
-  // 1. స్థానికంగా ఉన్న కౌంట్‌ను ఉంచి, సడన్ జంప్ లేకుండా రీడైరెక్ట్ చేయడం
-  const cachedViews = localStorage.getItem('last_known_views');
-  if (cachedViews && viewElem) {
-    viewElem.innerText = cachedViews;
+  async function updateAndShowViews() {
+    // ఒక సెషన్ లో ఒక్కసారి మాత్రమే కౌంట్ పెరుగుతుంది (జంప్ అవ్వకుండా రక్షిస్తుంది)
+    const hasVisited = sessionStorage.getItem('has_visited');
+
+    if (!hasVisited) {
+      try {
+        const result = await runTransaction(viewsRef, (current) => (current || 0) + 1);
+        if (result.committed) {
+          sessionStorage.setItem('has_visited', 'true');
+          if (viewElem) viewElem.innerText = 32 + result.snapshot.val();
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    } else {
+      // ఇప్పటికే చూసినట్లయితే కేవలం ఉన్న వ్యూస్ ని మాత్రమే తీసుకుంటుంది
+      try {
+        const snapshot = await get(viewsRef);
+        const currentViews = snapshot.val() || 0;
+        if (viewElem) viewElem.innerText = 32 + currentViews;
+      } catch (err) {
+        console.error(err);
+      }
+    }
   }
 
-  // 2. రియల్‌టైమ్ అప్‌డేట్ (డేటాబేస్‌లో మారగానే స్క్రీన్‌పై మారుతుంది)
-  onValue(viewsRef, (snapshot) => {
-    const viewsFromDb = snapshot.val() || 0;
-    const totalViews = 32 + viewsFromDb;
-    
-    if (viewElem) {
-      viewElem.innerText = totalViews;
-    }
-    localStorage.setItem('last_known_views', totalViews);
-  });
-
-  // 3. ప్రతి పేజీ లోడ్‌కి వ్యూ కౌంట్ +1 పెంచడం
-  runTransaction(viewsRef, (currentViews) => {
-    return (currentViews || 0) + 1;
-  }).catch((err) => {
-    console.error("Firebase Transaction Error:", err);
-  });
+  updateAndShowViews();
 </script>
-
   
 </body>
 </html>
