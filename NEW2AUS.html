@@ -1122,14 +1122,16 @@
     }
   });
   // Global view counter logic
+// Global view counter logic with offset
 const viewElem = document.getElementById('view-count');
 
 if (viewElem) {
-  fetch('https://counterapi.com/api/dsameera-allinoneplace/hits')
+  fetch('https://api.counterapi.dev/v1/dsameera-allinoneplace/views/up')
     .then(response => response.json())
     .then(data => {
-      if (data && data.value) {
-        viewElem.innerText = data.value;
+      if (data && data.count !== undefined) {
+        // పాత కౌంట్ 32 కి కొత్త కౌంట్ యాడ్ అవుతుంది
+        viewElem.innerText = 32 + data.count;
       }
     })
     .catch(err => {
