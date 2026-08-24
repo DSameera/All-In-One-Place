@@ -1138,6 +1138,21 @@ if (viewElem) {
       console.error('Error updating views:', err);
     });
 }
+// LocalStorage Based Auto-Increment View Counter
+(function updateViews() {
+  const viewElem = document.getElementById('view-count');
+  if (!viewElem) return;
+
+  // ప్రారంభ వ్యూస్ కౌంట్ 32గా సెట్ చేయబడుతుంది
+  let currentViews = parseInt(localStorage.getItem('page_views_count')) || 32;
+
+  // ప్రతీ రీఫ్రెష్‌కి +1 పెరుగుతుంది
+  currentViews += 1;
+
+  // కొత్త కౌంట్‌ని సేవ్ చేసి UI లో డిస్‌ప్లే చేస్తుంది
+  localStorage.setItem('page_views_count', currentViews);
+  viewElem.innerText = currentViews;
+})();
   </script>
 </body>
 </html>
