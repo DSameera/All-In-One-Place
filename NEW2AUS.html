@@ -1121,38 +1121,47 @@
       console.error('NEW2AUS main error (caught):', outerErr);
     }
   });
-  // Global view counter logic
-// Global view counter logic with offset
-const viewElem = document.getElementById('view-count');
-
-if (viewElem) {
-  fetch('https://api.counterapi.dev/v1/dsameera-allinoneplace/views/up')
-    .then(response => response.json())
-    .then(data => {
-      if (data && data.count !== undefined) {
-        // పాత కౌంట్ 32 కి కొత్త కౌంట్ యాడ్ అవుతుంది
-        viewElem.innerText = 32 + data.count;
-      }
-    })
-    .catch(err => {
-      console.error('Error updating views:', err);
-    });
-}
-// LocalStorage Based Auto-Increment View Counter
-(function updateViews() {
-  const viewElem = document.getElementById('view-count');
-  if (!viewElem) return;
-
-  // ప్రారంభ వ్యూస్ కౌంట్ 32గా సెట్ చేయబడుతుంది
-  let currentViews = parseInt(localStorage.getItem('page_views_count')) || 32;
-
-  // ప్రతీ రీఫ్రెష్‌కి +1 పెరుగుతుంది
-  currentViews += 1;
-
-  // కొత్త కౌంట్‌ని సేవ్ చేసి UI లో డిస్‌ప్లే చేస్తుంది
-  localStorage.setItem('page_views_count', currentViews);
-  viewElem.innerText = currentViews;
-})();
   </script>
+
+<!-- Firebase Realtime Database Script -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getDatabase, ref, runTransaction, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyA126ZxqD2QeTSyWunQvEAvqk7KRm4JvmM",
+    authDomain: "new2aus.firebaseapp.com",
+    databaseURL: "https://new2aus-default-rtdb.firebaseio.com",
+    projectId: "new2aus",
+    storageBucket: "new2aus.firebasestorage.app",
+    messagingSenderId: "301249941155",
+    appId: "1:301249941155:web:2a791c0829ecca3d32f916",
+    measurementId: "G-MVQ9XL8LRP"
+  };
+
+  // Firebase Initialize
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // Realtime Global View Counter
+  const viewsRef = ref(db, 'global_views');
+  
+  // 1. Increment View Count
+  runTransaction(viewsRef, (currentViews) => {
+    return (currentViews || 0) + 1;
+  });
+
+  // 2. Realtime UI Update
+  onValue(viewsRef, (snapshot) => {
+    const totalViews = snapshot.val() || 0;
+    const viewElem = document.getElementById('view-count');
+    if (viewElem) {
+      viewElem.innerText = 32 + totalViews;
+    }
+  });
+</script>
+
+
+  
 </body>
 </html>
